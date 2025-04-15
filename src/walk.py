@@ -7,13 +7,7 @@ NodeHandler = Callable[['ASTWalker', Dict[str, Any]], Any]
 
 class ASTWalker:
     """
-    A flexible AST walker that transforms parse trees into other representations.
-    
-    Features:
-    - Register handlers for specific node types using decorators
-    - Chain transformations using fluent API
-    - Support for pre/post processing steps
-    - Contextual data shared between handlers
+    A generic AST walker that applies handlers to nodes in an abstract syntax tree.
     """
     def __init__(self):
         self.handlers: Dict[str, NodeHandler] = {}
@@ -64,16 +58,7 @@ class ASTWalker:
         return self
     
     def walk(self, ast_node: Any) -> Any:
-        """
-        Walk through the AST, applying transformations based on registered handlers.
-        
-        Args:
-            ast_node: The AST node to process (could be an object with ast() method,
-                     a dictionary, a list, or a primitive value)
-        
-        Returns:
-            The transformed AST
-        """
+        """Walk the AST and apply registered handlers."""
         if hasattr(ast_node, 'ast'):
             return self.walk(ast_node.ast())
         
@@ -102,7 +87,6 @@ class ASTWalker:
         return result
     
     def _default_process(self, node_type: str, value: Any) -> Dict[str, Any]:
-        """Default processing for nodes without specific handlers."""
         if isinstance(value, list):
             processed_values = [self.walk(item) for item in value]
             return {"type": node_type, "children": processed_values}
