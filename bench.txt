@@ -1,0 +1,21 @@
+--- Comparse benchmarks ---
+Test on Fri May  9 10:17:30 AM EDT 2025
+Python version: Python 3.13.3
+As of commit 7217cc91e3719478804d82d2460436633e8d7024
+Git branch: main
+Git status: 3
+Hashes
+ff34140f22dcbd318b41ce601a98d07e src/test/__init__.py
+c3833187f030d7aed810edf767c5b42a src/test/simple.py
+8c10b61327ae2e541b93a5799d5a9569 src/test/cli.py
+ee3adb58415554be39d8362bd30df70e src/parser.py
+bf1ccc983981c0ada3e0a804f546ad61 src/__init__.py
+6044c1ac5688f09698bac43432abe61d src/abstract.py
+56ed31d922780c99411ef17abf4f52ed src/walk.py
+======================== 2 passed, 2 warnings in 0.04s =========================
+- real time:	0m0.725s
+- user time:	0m0.672s
+- sys time:	0m0.047s
+ Makefile | 34 +++++++++++++++++-----------------
+ bench.md | 20 --------------------
+ 2 files changed, 17 insertions(+), 37 deletions(-)
