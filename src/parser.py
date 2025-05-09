@@ -1,3 +1,4 @@
+import re
 from typing import List, Dict, Tuple, Union, Any, Optional as OptionalType, Type
 
 from .abstract import (
@@ -17,35 +18,28 @@ from .abstract import (
 )
 
 class ASTNode:
-    def __init__(self, node_type: str, value: Any = None) -> None:
-        self.name: str = node_type
+    def __init__(self, node_type: str, value: Any = None, custom_name: str = None) -> None:
+        self.type: str = node_type
+        self.name: str = custom_name or node_type
         self.value: Union[List[Any], Any] = value or []
     
     def ast(self) -> Dict[str, Any]:
         """
         Convert the ASTNode to an AST (dictionary) representation, with child ASTNodes being also converted.
         """
+        result = {"type": self.type, "name": self.name}
+        
         if isinstance(self.value, list):
-            return {
-                "name": self.name,
-                "value": [item.ast() if isinstance(item, ASTNode) else item for item in self.value]
-            }
+            result["value"] = [item.ast() if isinstance(item, ASTNode) else item for item in self.value]
         elif isinstance(self.value, ASTNode):
-            return {
-                "name": self.name,
-                "value": self.value.ast()
-            }
+            result["value"] = self.value.ast()
         elif isinstance(self.value, dict) and self.value.get('name') and self.value.get('value'):
             values_sub = self.value['value']
-            return {
-                "name": self.name,
-                "value": [x.ast() if isinstance(x, ASTNode) else x for x in values_sub]
-            }
+            result["value"] = [x.ast() if isinstance(x, ASTNode) else x for x in values_sub]
         else:
-            return {
-                "name": self.name,
-                "value": self.value
-            }
+            result["value"] = self.value
+        
+        return result
 
 class ParseResult:
     def __init__(self, value: Any, remaining: str = "") -> None:
@@ -64,25 +58,30 @@ class ParseResult:
             return self.value.ast()
         elif isinstance(self.value, dict) and self.value.get('name') and self.value.get('value'):
             values_sub = self.value['value']
-            return list(map(lambda x: x.ast() if isinstance(x, ASTNode) else x, values_sub))
+            if isinstance(values_sub, list):
+                return list(map(lambda x: x.ast() if isinstance(x, ASTNode) else x, values_sub))
+            else:
+                return values_sub.ast() if hasattr(values_sub, 'ast') else values_sub
         else:
             return self.value or None
 
 class Parser:
     def __init__(self, grammar_class: Type[Grammar]) -> None:
         self.grammar_class: Type[Grammar] = grammar_class
-        self.grammar_instance: Grammar = grammar_class()
+        self.grammar_instance: Grammar = grammar_class(grammar_class.name)
+        self.grammar_instance.name = grammar_class.name
         self.ignore_rules: Tuple[Any, ...] = self.grammar_instance.ignore()
     
     def _parse_optional(self, text: str, rule: Optional) -> OptionalType[ParseResult]:
         result: OptionalType[ParseResult] = self._apply_rule(text, rule.rule)
+        custom_name = getattr(rule, '_custom_name', None)
         if result:
-            node: ASTNode = ASTNode("Optional", value=[result.value])
+            node: ASTNode = ASTNode("Optional", value=[result.value], custom_name=custom_name)
             return ParseResult(node, result.remaining)
-        return ParseResult(ASTNode("Optional", value=[None]), text)
+        return ParseResult(ASTNode("Optional", value=[None], custom_name=custom_name), text)
     
     def _parse_minmax(self, text: str, rule: GenericMinmax) -> OptionalType[ParseResult]:
-        current_text: str = text.strip()  # Strip leading whitespace
+        current_text: str = text.strip()
         values: List[Any] = []
         
         for _ in range(rule.min_count):
@@ -98,10 +97,11 @@ class Parser:
                 if not result:
                     break
                 values.append(result.value)
-                current_text = result.remaining.strip()
                 
-                if result.remaining == text:
+                if current_text == result.remaining.strip():
                     break
+                
+                current_text = result.remaining.strip()
         else:
             for _ in range(rule.max_count - rule.min_count):
                 result: OptionalType[ParseResult] = self._apply_rule(current_text, rule.rule)
@@ -109,11 +109,12 @@ class Parser:
                     break
                 values.append(result.value)
                 current_text = result.remaining.strip()
-        
-        return ParseResult(ASTNode("Minmax", value=values), current_text)
+
+        custom_name = getattr(rule, '_custom_name', None)
+        return ParseResult(ASTNode("Minmax", value=values, custom_name=custom_name), current_text)
 
     def _parse_conjoined(self, text: str, rule: Conjoined) -> OptionalType[ParseResult]:
-        current_text: str = text
+        current_text: str = text.strip()
         values: List[Any] = []
         
         for sub_rule in rule.rules:
@@ -123,13 +124,15 @@ class Parser:
             values.append(result.value)
             current_text = result.remaining
         
-        return ParseResult(ASTNode("Conjoined", value=values), current_text)
+        custom_name = getattr(rule, '_custom_name', None)
+        return ParseResult(ASTNode("Conjoined", value=values, custom_name=custom_name), current_text)
 
     def _parse_or(self, text: str, rule: Or) -> OptionalType[ParseResult]:
         for sub_rule in rule.rules:
             result: OptionalType[ParseResult] = self._apply_rule(text, sub_rule)
             if result:
-                node: ASTNode = ASTNode("Or", value=[result.value])
+                custom_name = getattr(rule, '_custom_name', None)
+                node: ASTNode = ASTNode("Or", value=[result.value], custom_name=custom_name)
                 return ParseResult(node, result.remaining)
         return None
 
@@ -180,8 +183,9 @@ class Parser:
             transformed_data = self.grammar_instance.transform(parsed_values)
             return ParseResult(transformed_data)
         
-        return ParseResult(ast_data)
-    
+        grammar_node = ASTNode(self.grammar_instance.name, ast_data["value"])
+        return ParseResult(grammar_node)
+        
     def _clean_text(self, text: str) -> str:
         for rule in self.ignore_rules:
             if isinstance(rule, Literal):
@@ -215,19 +219,19 @@ class Parser:
         return None
     
     def _parse_string(self, text: str) -> OptionalType[ParseResult]:
-        import re
-        match = re.match(r'\"(.*?)\"', text)
+        text = text.strip()
+        match = re.match(r'(.*?)', text)
         if match:
             matched_text: str = match.group(1)
             full_match: str = match.group(0)
             node: ASTNode = ASTNode("String", value=matched_text)
             return ParseResult(node, text[len(full_match):])
-        return None
     
     def _parse_literal(self, text: str, rule: Literal) -> OptionalType[ParseResult]:
         text = text.strip()
         if text.startswith(rule.value):
-            node: ASTNode = ASTNode("Literal", value=rule.value)
+            custom_name = getattr(rule, '_custom_name', None)
+            node: ASTNode = ASTNode("Literal", value=rule.value, custom_name=custom_name)
             return ParseResult(node, text[len(rule.value):])
         return None
 
@@ -237,6 +241,7 @@ class Parser:
         match = re.match(rule.pattern, text)
         if match:
             matched_text: str = match.group(0)
-            node: ASTNode = ASTNode("RegExp", value=matched_text)
+            custom_name = getattr(rule, '_custom_name', None)
+            node: ASTNode = ASTNode("RegExp", value=matched_text, custom_name=custom_name)
             return ParseResult(node, text[len(matched_text):])
         return None

@@ -1,12 +1,14 @@
-# Simple parsing infrastructure
+# Comparse, Parsing to Scale
 
-Comparse (Compliant Parser) is a library to build parsing infrastructure. It was outlined in a section of my research paper "Reducing the Gap Between 'Computer Science' Logic and 'Mathematical' Logic."   
-The design is intended to be fully fluent with Python and understandable to an average user (or even mathematician). As long as you know Python, you can quite simply build projects that require a parser.   
+Comparse (Compliant Parser) is a research project library to build parsing infrastructure. It was outlined in a section (1) of my research paper "Reducing the Gap Between 'Computer Science' Logic and 'Mathematical' Logic."   
+The design is intended to be fully fluent with Python and understandable to an average user (or even non-Python familiar mathematician). As long as you know some level of Python, you can quite simply build projects that require a parser.   
    
-Though the design is fully there, the implementation is not. Overall, parsing works "okay" in some cases, however with more complex grammars, it fails and will not parse.   
+Though the design is fully there, the implementation is not 100% complete. Overall, parsing works "okay" in some cases, however with more complex grammars, it may fail and will not parse. 
    
 Grammars (a set of rules to match and extract features from text) are defined through decorators attached to classes. The `Parser` class may specify a root grammar, which is the "parent" of all other grammars (those can be specified as dependencies of the root grammar).   
 AST walkers (which transform the parsed tree into a more usable form) are also defined through decorators- those decorators being custom methods of a defined class.   
+
+Comparse requires no external dependencies, and is optimized for minimal resource usage.
    
 ## Simple Example
 *I cannot trust that this works in the current state of the project.*
@@ -21,8 +23,7 @@ from src.abstract import Grammar, grammar, joined, Literal
     )
 )
 class HelloWorldParser(Grammar):
-    def __init__(self):
-        super().__init__("HelloWorldParser")
+    name = "HelloWorldParser"
 
     def ignore(self):
         return (Literal(" "))
@@ -36,3 +37,13 @@ As you can see, parsers are relatively simple to define compared to more "commer
 Some of these solutions are solved by compiling with Nuitka, however that's not perfect either, as decorators will be compiled as functions that must be applied to a class type (How? Not sure).   
    
 This project is a dependency of the [Bass](https://github.com/microcrit/bass) algorithm-expression language which is outlined in the second section of the paper.
+
+## Todo
+### Complete
+- [x] AST Walkers
+- [x] Type-safety
+- [x] Grammar decorators
+
+### Incomplete
+- [ ] Type-safe testing
+- [ ] Parallel-focused, Erlang processing backend (as according to the paper)

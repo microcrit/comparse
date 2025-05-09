@@ -9,11 +9,11 @@ __pycache__
 *.db
 *.sqlite
 *.log
-main.build
-main.dist
-main.onefile-build
 .pytest_cache
 *.manifest
 *.spec
 lib
 main.so
+__init__.build
+__init__.dist
+__init__.onefile-build

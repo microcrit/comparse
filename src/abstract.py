@@ -19,6 +19,13 @@ class TokenAbstract:
     
     def node_type(self) -> str:
         return self.__class__.__name__
+    
+    def with_name(self, custom_name: str) -> 'TokenAbstract':
+        self._custom_name = custom_name
+        return self
+    
+    def get_node_name(self) -> str:
+        return getattr(self, '_custom_name', None) or self.node_type()
 
 class GeneratedASTObject:
     def __init__(self, name: str, value: Any) -> None:
@@ -58,8 +65,10 @@ class Literal(TokenAbstract):
         return [self.value]
     
     def ast(self) -> Dict[str, str]:
+        custom_name = getattr(self, '_custom_name', None)
         return {
-            "name": self.name,
+            "type": self.name,
+            "name": custom_name or self.name,
             "value": self.value
         }
 
@@ -76,6 +85,14 @@ class Number(TokenAbstract):
     def to_tokens(self) -> List[str]:
         return [r'\d+']
 
+    def ast(self) -> Dict[str, Any]:
+        custom_name = getattr(self, '_custom_name', None)
+        return {
+            "type": self.name,
+            "name": custom_name or self.name,
+            "value": None
+        }
+
 class String(TokenAbstract):
     def __init__(self) -> None:
         self.name: str = "String"
@@ -88,6 +105,14 @@ class String(TokenAbstract):
 
     def to_tokens(self) -> List[str]:
         return [r'\".*?\"']
+    
+    def ast(self) -> Dict[str, Any]:
+        custom_name = getattr(self, '_custom_name', None)
+        return {
+            "type": self.name,
+            "name": custom_name or self.name,
+            "value": None
+        }
 
 class Dependency(TokenAbstract):
     def __init__(self, decorated_class: TokenAbstract) -> None:
@@ -102,6 +127,14 @@ class Dependency(TokenAbstract):
 
     def to_tokens(self) -> List[Any]:
         return self.decorated_class.to_tokens()
+    
+    def ast(self) -> Dict[str, Any]:
+        custom_name = getattr(self, '_custom_name', None)
+        return {
+            "type": self.name,
+            "name": custom_name or self.name,
+            "decorated": self.decorated_class.ast()
+        }
 
 T = TypeVar('T')
 def grammar(lexical_rule: TokenAbstract) -> Callable[[Type[T]], Type[T]]:
@@ -124,8 +157,10 @@ class Or(TokenAbstract):
         return [rule.to_tokens() for rule in self.rules]
     
     def ast(self) -> Dict[str, Any]:
+        custom_name = getattr(self, '_custom_name', None)
         return {
-            "name": "Or",
+            "type": "Or",
+            "name": custom_name or "Or",
             "rules": [rule.ast() for rule in self.rules]
         }
     
@@ -140,8 +175,10 @@ class Optional(TokenAbstract):
         return [self.rule.to_tokens()]
     
     def ast(self) -> Dict[str, Any]:
+        custom_name = getattr(self, '_custom_name', None)
         return {
-            "name": "Optional",
+            "type": "Optional",
+            "name": custom_name or "Optional",
             "rule": self.rule.ast()
         }
     
@@ -158,11 +195,12 @@ class GenericMinmax(TokenAbstract):
         return [self.rule.to_tokens()]
     
     def ast(self) -> Dict[str, Any]:
+        custom_name = getattr(self, '_custom_name', None)
         return {
-            "name": "Minmax",
+            "type": "Minmax",
+            "name": custom_name or "Minmax",
             "rule": self.rule.ast(),
-            "min_count": self.min_count,
-            "max_count": self.max_count
+            "clamp": [self.min_count, self.max_count]
         }
 
 def either(*rules: TokenAbstract) -> Or:
@@ -177,11 +215,14 @@ def option(rule: TokenAbstract) -> Optional:
     """
     return Optional(rule)
 
-def minmax(rule: TokenAbstract, min_count: int = 0, max_count: int = 0) -> GenericMinmax:
+def minmax(min_count: int = 0, max_count: int = 0):
     """
     Matches a minimum-to-maximum number of times.
     """
-    return GenericMinmax(rule, min_count, max_count)
+    def gen(rule: TokenAbstract) -> GenericMinmax:
+        return GenericMinmax(rule, min_count, max_count)
+    
+    return gen
 
 class RegExp(TokenAbstract):
     def __init__(self, pattern: str) -> None:
@@ -218,8 +259,10 @@ class Me(TokenAbstract):
         return []
     
     def ast(self) -> Dict[str, str]:
+        custom_name = getattr(self, '_custom_name', None)
         return {
-            "name": "Me"
+            "type": self.name,
+            "name": custom_name or self.name
         }
 
 class Conjoined(TokenAbstract):
@@ -236,8 +279,10 @@ class Conjoined(TokenAbstract):
         return [rule.to_tokens() for rule in self.rules]
     
     def ast(self) -> Dict[str, Any]:
+        custom_name = getattr(self, '_custom_name', None)
         return {
-            "name": "Conjoined",
+            "type": "Conjoined",
+            "name": custom_name or "Conjoined",
             "rules": [rule.ast() for rule in self.rules]
         }
     
