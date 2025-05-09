@@ -1,19 +1,23 @@
 --- Comparse benchmarks ---
-Test on Fri May  9 11:00:27 AM EDT 2025
+Test on Fri May  9 01:02:38 PM EDT 2025
 Python version: Python 3.13.3
-As of commit a4f794f5fae907bc6f39b8a11aedcfb4518436ae
+As of commit cb03025f40ca332bda05630fca7452eba00ce60a
 Git branch: main
-Git status: 1
+Git status: 3
 Hashes
-ff34140f22dcbd318b41ce601a98d07e src/test/__init__.py
-5a72d82d664999e68f9c733c6a41ad48 src/test/simple.py
-5cb0dc4afcd8aaf70f4f33ff2e840ca4 src/test/cli.py
-7a4122b3a7fb3b29bf2686131524ed0a src/parser.py
-0f8ba8518f281df3bd012e89e4739683 src/__init__.py
+740d3ad83047ba53cd9768a14b94b975 src/test/__init__.py
+bb1fc3f2d9f1bf4df581c43f33fb59d5 src/test/simple.py
+36eb94c604bda0ffa9eead061508f727 src/test/cli.py
+b9cc7ff74934c834d745bb8fbd2723f3 src/parser.py
+34713c4fa102c175cb006b8de383e861 src/__init__.py
 6044c1ac5688f09698bac43432abe61d src/abstract.py
-d41a5982c5a3c1488ba017b4c28576fe src/generator.py
-56ed31d922780c99411ef17abf4f52ed src/walk.py
-======================== 2 passed, 2 warnings in 0.05s =========================
-- real time:	0m0.764s
-- user time:	0m0.713s
-- sys time:	0m0.040s
+8d4abbdc19eb7bea3346b32e3a0bf54b src/generator.py
+a95e0d440ef67f1739a784ec50182caf src/walk.py
+============================== 2 passed in 0.05s ===============================
+- real time:	0m0.809s
+- user time:	0m0.738s
+- sys time:	0m0.052s
+ bench.txt          | 28 ++++++++++++++--------------
+ src/test/cli.py    | 46 ++++++++++++++++++++++------------------------
+ src/test/simple.py |  4 +---
+ 3 files changed, 37 insertions(+), 41 deletions(-)

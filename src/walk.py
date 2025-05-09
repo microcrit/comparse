@@ -134,7 +134,6 @@ class ASTWalker:
         for processor in self.pre_processors:
             ast_node = processor(ast_node, self.context)
         
-        # Use type for handler lookup, but maintain name for path
         node_type = ast_node.get("type", ast_node.get("name"))
         node_name = ast_node.get("name", node_type)
         current_path = path + ([node_name] if node_name else [])

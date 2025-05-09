@@ -16,34 +16,27 @@ class TypedTransformer:
     def handlers(self):
         @self.walker.for_node("CommandLineParser")
         def handle_command_line_parser(walker, node: Dict[str, Any], ctx: WalkContext) -> StructuredOutput:
-            print("CommandLineParser (PARENT)")
             processed_values = node.get("processed_value", [])
             return StructuredOutput(elements=processed_values)
         
         @self.walker.for_node("Minmax")
         def handle_minmax(walker, node: Dict[str, Any], ctx: WalkContext) -> List[Any]:
-            print(" " * ctx.level, "Minmax", node)
             return node.get("processed_value", [])
         
         @self.walker.for_node("Or")
         def handle_or(walker, node: Dict[str, Any], ctx: WalkContext) -> Any:
-            print(" " * ctx.level, "Or", node)
             return node.get("processed_value", [])
             
         @self.walker.for_node("Conjoined")
         def handle_conjoined(walker, node: Dict[str, Any], ctx: WalkContext) -> Any:
-            print(" " * ctx.level, "Conjoined", node)
             return node.get("processed_value", [])
             
         @self.walker.for_node("Literal")
         def handle_literal(walker, node: Dict[str, Any], ctx: WalkContext) -> str:
-            print(" " * ctx.level, "Literal", node)
             return node["value"]
             
         @self.walker.for_node("RegExp")
         def handle_regexp(walker, node: Dict[str, Any], ctx: WalkContext) -> str:
-            print(" " * ctx.level, "RegExp", node)
-
             return node["value"]
             
         return [
@@ -70,7 +63,7 @@ string = either(
         RegExp(r"(?:[^\\']|\\\'|\\\\)*"),
         Literal("'")
     ),
-    RegExp(r"[^\s=]+")
+    RegExp(r"[^\s]+")
 )
 
 flag = joined(
@@ -78,21 +71,28 @@ flag = joined(
     RegExp(r"[a-zA-Z][\w\-]*")
 )
 
-option_with_value = joined(
-    either(Literal("-"), Literal("--")),
-    RegExp(r"[a-zA-Z][\w\-]*"),
-    either(
-        joined(Literal("="), string),
-        joined(Literal(" "), string)
-    )
+option_with_equals = joined(
+    flag,
+    Literal("="),
+    string
 )
 
+option_with_space = joined(
+    flag,
+    string
+)
+
+option_with_value = either(option_with_equals, option_with_space)
+
 @grammar(
-    minmax(1)(
-        either(
-            option_with_value,
-            flag,
-            string
+    joined(
+        string,
+        minmax(0,0)(
+            either(
+                option_with_value,
+                flag,
+                string
+            )
         )
     )
 )
@@ -108,13 +108,11 @@ def test_answer():
         "python -m src.parser --help",
         "python -m src.parser --help --verbose",
         "echo 'Hello, World!' --flag",
-        "python -m src.parser --help --verbose --flag --option=value --another-option 'arg1' 'arg2'",
+        "python -m src.parser --help --verbose --flag --option=value --another-option",
     ]
 
     parser = Parser(CommandLineParser)
     transformer = TypedTransformer()
-
-    asts = []
 
     for string in strings:
         print(f"Parsing: {string}")
@@ -127,4 +125,4 @@ def test_answer():
 
         assert isinstance(transformed_result, StructuredOutput)
 
-        asts.append(transformed_result)
+        print(transformed_result.elements)

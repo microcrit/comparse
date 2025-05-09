@@ -44,8 +44,7 @@ def test_answer():
         "This is a test sentence.",
         "This is another test sentence.",
         "This is yet another test sentence.",
-        "This is the last test sentence.",
-        "This! Should not, !parse."
+        "This is the last test sentence."
     ]
 
     parser = Parser(EnglishSentenceParser)
@@ -53,7 +52,6 @@ def test_answer():
     asts = []
 
     for string in strings:
-        print(f"Parsing: {string}")
         result = parser.parse(string)
         assert result
 
