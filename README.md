@@ -1,5 +1,6 @@
 # Comparse, Parsing to Scale
-
+*This project is considered feature-complete and will only be maintained to fix bugs, not add new features. The intention of this was to be used for a research paper and not production, so do not expect full reliability for commercial use. However, in its current state, all tests pass.*
+    
 Comparse (Compliant Parser) is a research project library to build parsing infrastructure. It was outlined in a section (1) of my research paper "Reducing the Gap Between 'Computer Science' Logic and 'Mathematical' Logic."   
 The design is intended to be fully fluent with Python and understandable to an average user (or even non-Python familiar mathematician). As long as you know some level of Python, you can quite simply build projects that require a parser.   
    
