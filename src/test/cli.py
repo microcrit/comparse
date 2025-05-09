@@ -1,6 +1,6 @@
 from ..parser import Parser
 from ..abstract import Grammar, grammar, minmax, joined, either, Literal, RegExp
-from ..parser import Parser, ParseResult
+from ..parser import ParseResult
 from ..walk import TypedASTWalker, WalkContext
 from typing import Dict, Any, List
 
@@ -128,5 +128,3 @@ def test_answer():
         assert isinstance(transformed_result, StructuredOutput)
 
         asts.append(transformed_result)
-
-    return asts

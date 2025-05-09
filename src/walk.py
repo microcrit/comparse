@@ -1,4 +1,4 @@
-from typing import Dict, Any, List, Callable, TypeVar, Optional, Union, Type, Generic
+from typing import Dict, Any, List, Callable, TypeVar, Optional, Type, Generic
 from functools import wraps
 from dataclasses import dataclass
 

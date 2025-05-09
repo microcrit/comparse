@@ -201,7 +201,7 @@ class CodeTemplateManager:
                 f"            return ParseResult(node, result{i}.remaining)\n"
             )
         
-        method += f"        return None\n\n"
+        method += "        return None\n\n"
         return method
     
     @staticmethod
@@ -331,6 +331,10 @@ class CodeTemplateManager:
             "        result = self._parse_root(text)\n"
             "        if not result:\n"
             "            raise ValueError(f\"Failed to parse: {text}\")\n"
+            "        \n"
+            "        if result.remaining.strip():\n"
+            "            raise ValueError(f\"Failed to parse entire string. Remaining text: {result.remaining}\")\n"
+            "        \n"
             "        return result\n\n"
         )
 

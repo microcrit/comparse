@@ -1,6 +1,5 @@
 from ..parser import Parser
 from ..abstract import Grammar, grammar, minmax, joined, either, Literal, RegExp, option
-from ..parser import Parser
 
 @grammar(
     joined(
@@ -45,7 +44,8 @@ def test_answer():
         "This is a test sentence.",
         "This is another test sentence.",
         "This is yet another test sentence.",
-        "This is the last test sentence."
+        "This is the last test sentence.",
+        "This! Should not, !parse."
     ]
 
     parser = Parser(EnglishSentenceParser)
@@ -62,5 +62,3 @@ def test_answer():
         print(f"AST: {ast}")
         
         asts.append(ast)
-    
-    return asts

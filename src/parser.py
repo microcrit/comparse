@@ -186,6 +186,9 @@ class Parser:
         result: OptionalType[ParseResult] = self._parse_with_rules(text, self.grammar_class.lexical_rule_root)
         if not result:
             raise ValueError(f"Failed to parse: {text}")
+
+        if result.remaining.strip():
+            raise ValueError(f"Failed to parse entire string. Remaining text: {result.remaining}")
             
         if isinstance(result.value, list):
             parsed_values: List[Any] = result.value
