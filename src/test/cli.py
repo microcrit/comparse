@@ -130,7 +130,3 @@ def test_answer():
         asts.append(transformed_result)
 
     return asts
-
-if __name__ == "__main__":
-    test_answer()
-    print("All tests passed.")

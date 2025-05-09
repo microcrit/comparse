@@ -9,6 +9,12 @@ Grammars (a set of rules to match and extract features from text) are defined th
 AST walkers (which transform the parsed tree into a more usable form) are also defined through decorators- those decorators being custom methods of a defined class.   
 
 Comparse requires no external dependencies, and is optimized for minimal resource usage.
+
+## Advantages
+- *Type-safe* - The parser is optionally type-safe and strongly-typed (for AST walkers/transformers), and can be trusted for correctness.
+- *Fluent* - The parser is designed to be idiomatic and fluent with Python, and is easy to use.
+- *No external dependencies* - The parser is designed to be self-contained and does not require any external dependencies.
+- *Dual-parsing* - The infrastructure can both parse code at runtime and generate a standalone parser from the grammar. This is useful if you aim to get a significant boost from startup performance, as decorators are not required. This is also useful if you plan to compile your code, E.G. through Nuitka.
    
 ## Simple Example
 *I cannot trust that this works in the current state of the project.*
@@ -43,6 +49,7 @@ This project is a dependency of the [Bass](https://github.com/microcrit/bass) al
 - [x] AST Walkers
 - [x] Type-safety
 - [x] Grammar decorators
+- [x] Parser generation
 
 ### Incomplete
 - [ ] Type-safe testing

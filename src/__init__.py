@@ -10,3 +10,4 @@ It is optimized to be easy to expand upon for large files and complex structures
 from . import abstract
 from . import parser
 from . import walk
+from . import generator

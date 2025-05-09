@@ -1,8 +1,6 @@
 from ..parser import Parser
 from ..abstract import Grammar, grammar, minmax, joined, either, Literal, RegExp, option
-from ..parser import Parser, ParseResult
-from ..walk import TypedASTWalker, WalkContext
-from typing import Dict, Any, List
+from ..parser import Parser
 
 @grammar(
     joined(

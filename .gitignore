@@ -17,3 +17,4 @@ main.so
 __init__.build
 __init__.dist
 __init__.onefile-build
+generated

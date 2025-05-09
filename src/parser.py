@@ -72,6 +72,23 @@ class Parser:
         self.grammar_instance.name = grammar_class.name
         self.ignore_rules: Tuple[Any, ...] = self.grammar_instance.ignore()
     
+    @classmethod
+    def generate(cls, grammar_class: Type[Grammar], output_dir: str = None, output_file: str = None) -> str:
+        from .generator import ParserGenerator
+        """
+        Generate a standalone parser from the grammar.
+        
+        Args:
+            grammar_class: The grammar class to generate a parser for
+            output_file: Optional file path to write the parser to
+            output_dir: Optional directory to write the parser to
+            
+        Returns:
+            The file path where the parser was generated
+        """
+        generator = ParserGenerator(grammar_class, output_dir)
+        return generator.generate(output_file)
+    
     def _parse_optional(self, text: str, rule: Optional) -> OptionalType[ParseResult]:
         result: OptionalType[ParseResult] = self._apply_rule(text, rule.rule)
         custom_name = getattr(rule, '_custom_name', None)
